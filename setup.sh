@@ -2,17 +2,17 @@
 # setup.sh — DSH Remote Setup: sekali jalan di laptop baru.
 #
 #   Cara pakai (setelah repo ini di GitHub):
-#     curl -fsSL https://raw.githubusercontent.com/GITHUB_USER/dsh-remote-setup/main/setup.sh | bash
+#     curl -fsSL https://raw.githubusercontent.com/anggakersanamunggaran/dsh-remote-setup/main/setup.sh | bash
 #
 # Yang dilakukan:
 #   1. Menyalin script dshlan (on/off) ke ~/
 #   2. Menambahkan fungsi `dshlan` ke ~/.bashrc
 #   3. Mengecek Node.js >= 24 (wajib buat DSH)
-#   4. Menyalin file Windows (dsh-lan.ps1/.cmd) ke C:\Users\Public
-#   5. Mencetak langkah Windows + HP yang tersisa
+#   4. Menginstall DeepSeek Harness (dsh) secara global
+#   5. Menyalin file Windows (dsh-lan.ps1/.cmd) ke C:\Users\Public
+#   6. Mencetak langkah Windows + HP yang tersisa
 set -u
 
-# Username GitHub (dipakai kalau setup.sh dijalankan langsung via curl):
 GITHUB_USER="anggakersanamunggaran"
 
 echo "=================================================="
@@ -21,7 +21,7 @@ echo "=================================================="
 
 # 1) Script dshlan
 echo ""
-echo "[1/5] Menyalin script dshlan ke ~/ ..."
+echo "[1/6] Menyalin script dshlan ke ~/ ..."
 if [ -f "./dsh-lan-restart.sh" ] && [ -f "./dsh-lan-stop.sh" ]; then
     cp ./dsh-lan-restart.sh ./dsh-lan-stop.sh "$HOME/"
     echo "  OK (dari folder repo)"
@@ -33,7 +33,7 @@ fi
 chmod +x "$HOME/dsh-lan-restart.sh" "$HOME/dsh-lan-stop.sh"
 
 # 2) Fungsi dshlan di .bashrc
-echo "[2/5] Menambahkan fungsi dshlan ke ~/.bashrc ..."
+echo "[2/6] Menambahkan fungsi dshlan ke ~/.bashrc ..."
 if grep -q "^dshlan()" "$HOME/.bashrc" 2>/dev/null; then
     echo "  (sudah ada — dilewati)"
 else
@@ -52,26 +52,46 @@ EOF
 fi
 
 # 3) Node.js check
-echo "[3/5] Mengecek Node.js ..."
+echo "[3/6] Mengecek Node.js ..."
 if command -v node >/dev/null 2>&1 && [ "$(node --version | tr -dc '0-9' | cut -c1-2)" -ge 24 ]; then
     echo "  ✅ node $(node --version)"
 else
-    echo "  ⚠️ Node < 24 atau belum ada. Pasang via nvm:"
+    echo "  ⚠️ Node < 24 atau belum ada. Pasang dulu via nvm:"
     echo "     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash"
     echo "     nvm install 24 && nvm alias default 24"
+    echo "  lalu jalankan ulang setup ini."
+    exit 1
 fi
 
-# 4) File Windows
-echo "[4/5] Menyiapkan file Windows di C:\\Users\\Public ..."
+# 4) Install DeepSeek Harness (dsh)
+echo "[4/6] Menginstall DeepSeek Harness (dsh) ..."
+if command -v dsh >/dev/null 2>&1; then
+    echo "  ✅ dsh sudah terinstall: $(command -v dsh)"
+else
+    echo "  Menginstall: npm install -g @deepseek-ai/dsh"
+    npm install -g @deepseek-ai/dsh 2>&1 | tail -2
+    if command -v dsh >/dev/null 2>&1; then
+        echo "  ✅ dsh terinstall: $(command -v dsh)"
+    else
+        echo "  ⚠️ Install dsh gagal — cek error di atas, atau jalankan manual:"
+        echo "     npm install -g @deepseek-ai/dsh"
+    fi
+fi
+
+# 5) File Windows
+echo "[5/6] Menyiapkan file Windows di C:\\Users\\Public ..."
 for f in dsh-lan.ps1 dsh-lan.cmd; do
     if [ -f "./$f" ]; then
         cp "./$f" /mnt/c/Users/Public/ 2>/dev/null && echo "  ✅ $f -> C:\\Users\\Public\\$f" || echo "  (lewatkan — jalankan dari folder repo nanti)"
     fi
 done
 
-# 5) Panduan
+# 6) Panduan
 echo ""
-echo "[5/5] ══════════ LANGKAH BERIKUTNYA ══════════"
+echo "[6/6] ══════════ LANGKAH BERIKUTNYA ══════════"
+echo ""
+echo " DeepSeek Harness (dsh) SUDAH terinstall. Tes lokal dulu:"
+echo "   dsh web   → buka http://127.0.0.1:3080"
 echo ""
 echo " A. TAILSCALE (di Windows):"
 echo "    1. Install https://tailscale.com/download — login dengan AKUN SAMA"
