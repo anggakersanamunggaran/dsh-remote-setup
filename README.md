@@ -73,7 +73,10 @@ The script does all of this automatically:
 Then follow the printed steps:
 
 - **A. Tailscale** — install on Windows, log in with the same account used on your phone, note the new IP (`tailscale ip -4`).
-- **B. Windows (admin)** — install OpenSSH Server, allow port 22, set a Windows account password (SSH rejects blank passwords; keep auto-login via `netplwiz`), then run `dsh-lan.ps1` for the port-forward + firewall.
+- **B. Windows (admin)**:
+  1. Install OpenSSH Server and allow port 22 (4 commands above).
+  2. **⚠️ Set a Windows account password** — SSH rejects blank passwords, so this step is **required**. *Settings → Accounts → Sign-in options → Password → Add*. You can keep auto-login via `netplwiz`.
+  3. Run `dsh-lan.ps1` for the port-forward + firewall.
 - **C. WSL** — `source ~/.bashrc && dshlan on` (auto-detects WSL/LAN/Tailscale IPs and starts DSH with the right `--trusted-host` flags).
 - **D. Phone** — update the Termux alias with the new Tailscale IP.
 - **E. Phone browser** — `http://127.0.0.1:3080`.
