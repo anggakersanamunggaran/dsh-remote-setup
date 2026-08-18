@@ -82,23 +82,37 @@ Then follow the printed steps:
 
 ## 📱 Part 3 — Phone access (Android)
 
-1. **Tailscale** on the phone (same account) — required, it's the secure path from anywhere.
-2. **Termux** — install from [F-Droid](https://f-droid.org/packages/com.termux/) or GitHub. *Skip the Play Store build — it's abandoned and its SSL is broken.*
-3. Install OpenSSH and set an alias:
+### 1. Install Termux (one-time)
+
+> ⚠️ **Skip the Play Store build** — it's abandoned (no updates since 2024, SSL broken, `unable to locate package`). Use one of these instead:
+
+- **Fast download (recommended)** — GitHub release, ~33 MB (arm64):
+  https://github.com/termux/termux-app/releases/download/v0.118.3/termux-app_v0.118.3+github-debug_arm64-v8a.apk
+- **Official** — F-Droid: https://f-droid.org/packages/com.termux/
+
+> **Play Protect blocking the APK?** Tap *More details → Install anyway*, or temporarily disable Play Protect scanning (Play Store → profile icon → Play Protect → ⚙️ settings), install, then re-enable.
+
+### 2. One-time phone setup
+
+1. **Tailscale** on the phone — sign in with the **same account** as the PC.
+2. In Termux:
 
 ```bash
+pkg update
 pkg install openssh -y
 echo "alias dsh='ssh -L 3080:127.0.0.1:3080 user@<TAILSCALE-IP>'" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-4. Daily use:
+Replace `<TAILSCALE-IP>` with the PC's Tailscale IP (get it on the PC with `tailscale ip -4`).
 
-```bash
-dsh        # keeps the tunnel open
-```
+### 3. Daily use — one command
 
-Then open `http://127.0.0.1:3080` in the phone browser.
+1. Tailscale **ON** on the phone
+2. In Termux, type **`dsh`** — that's it (keep Termux open)
+3. Phone browser → `http://127.0.0.1:3080`
+
+> The alias is an **SSH local port forward**: it maps the phone's `127.0.0.1:3080` → the PC's DSH. The browser sees a loopback origin, so DSH's frontend boots in **full mode** — workspaces, sessions, and history, identical to your desktop.
 
 ---
 
